@@ -1,27 +1,74 @@
 config EXFAT_FS
-	tristate
-	default y
+	tristate "exFAT fs support"
+	default m
 	select NLS
 	select NLS_UTF8
 	help
-	  If you want to use the exFAT file systems, then you must say Y or M here
-	  to inlucde exFAT support.
+	  Say Y or M here to include support for the exFAT filesystem.
+
+	  To compile this as a module, choose M: the module will be called
+	  exfat.
+
+config EXFAT_DEFAULT_CODEPAGE
+	int "Default codepage for exFAT"
+	depends on EXFAT_FS
+	default 437
+	help
+	  This option should be set to the codepage of your exFAT filesystems.
+	  It can be overridden with the "codepage" mount option.
+
+config EXFAT_DEFAULT_IOCHARSET
+	string "Default iocharset for exFAT"
+	depends on EXFAT_FS
+	default "utf8"
+	help
+	  Set this to the default input/output character set you'd
+	  like exFAT to use. It should probably match the character set
+	  that most of your exFAT filesystems use, and can be overridden
+	  with the "iocharset" mount option for exFAT filesystems.
+
+	  In most cases, this should be set to utf8.
+
+	  Enable any character sets you need in File Systems/Native Language
+	  Support.
 
 config EXFAT_VIRTUAL_XATTR
-	bool "Virtual xattr support for exFAT filesystem"
+	bool "Virtual xattr support for exFAT"
+	depends on EXFAT_FS && SECURITY_SELINUX
+	help
+	  Say Y here to enable virtual xattr support, allowing you to
+	  set a default SELinux label for files on the exFAT filesystem.
+
+config EXFAT_VIRTUAL_XATTR_SELINUX_LABEL
+	string "Default SELinux label string for exFAT"
+	depends on EXFAT_VIRTUAL_XATTR
+	default "u:object_r:sdcard_external:s0"
+	help
+	  Set this to the default string for exFAT SELinux label.
+
+config EXFAT_DISCARD
+	bool "Discard support for exFAT"
 	default y
 	depends on EXFAT_FS
 	help
-	  Modification of exFAT filesystem for virtual xattr
+	  Say Y here to enable support for the block discard feature
+	  on exFAT filesystems.
 
-config EXFAT_VIRTUAL_XATTR_SELINUX_LABEL
-	string "Default string for SELinux label"
-	depends on EXFAT_FS && EXFAT_VIRTUAL_XATTR
-	default "u:object_r:sdcard_external:s0"
+	  You must mount with the discard option to use it.
+
+config EXFAT_COMPAT_TUXERA
+	bool "Tuxera compatibility for exFAT"
+	depends on EXFAT_FS
 	help
-	  Set this to the default string for SELinux label.
+	  Say Y here to have the exFAT driver also register as texfat
+	  and support extra mount options for drop-in replacement on
+	  systems previously using Tuxera's commercial exFAT driver.
 
-config EXFAT_SUPPORT_STLOG
-	bool "Enable storage log"
-	default y
-	depends on EXFAT_FS && PROC_STLOG
+	  If you are building exFAT as a module, this will change
+	  the module's name to texfat.
+
+config EXFAT_DEBUG
+	bool "Debugging support for exFAT"
+	depends on EXFAT_FS
+	help
+	  Say Y here to enable debugging in exFAT driver.

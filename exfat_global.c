@@ -16,7 +16,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "exfat_config.h"
 #include "exfat_global.h"
 
 INT32 __wstrchr(UINT16 *str, UINT16 wchar)

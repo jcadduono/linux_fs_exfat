@@ -19,18 +19,14 @@
 #ifndef _EXFAT_GLOBAL_H
 #define _EXFAT_GLOBAL_H
 
+#define pr_fmt(fmt) "%s: %s: " fmt, KBUILD_MODNAME, __func__
+
 #include <linux/kernel.h>
 #include <linux/mm.h>
 #include <linux/slab.h>
 #include <linux/string.h>
 #include <linux/fs.h>
 #include "exfat_config.h"
-
-#ifdef CONFIG_EXFAT_SUPPORT_STLOG
-#include <linux/stlog.h>
-#else
-#define ST_LOG(fmt,...)
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -81,33 +77,37 @@ extern "C" {
 #undef MEMCMP
 #endif
 
-#define MALLOC(size)                    kmalloc(size, GFP_KERNEL)
-#define FREE(mem)                       if (mem) kfree(mem)
-#define MEMSET(mem, value, size)        memset(mem, value, size)
-#define MEMCPY(dest, src, size)         memcpy(dest, src, size)
-#define MEMCMP(mem1, mem2, size)        memcmp(mem1, mem2, size)
-#define COPY_DENTRY(dest, src)				memcpy(dest, src, sizeof(DENTRY_T))
+#define MALLOC(size)              kmalloc(size, GFP_KERNEL)
+#define FREE(mem)                 if (mem) kfree(mem)
+#define MEMSET(mem, value, size)  memset(mem, value, size)
+#define MEMCPY(dest, src, size)   memcpy(dest, src, size)
+#define MEMCMP(mem1, mem2, size)  memcmp(mem1, mem2, size)
+#define COPY_DENTRY(dest, src)    memcpy(dest, src, sizeof(DENTRY_T))
 
-#define STRCPY(dest, src)               strcpy(dest, src)
-#define STRNCPY(dest, src, n)           strncpy(dest, src, n)
-#define STRCAT(str1, str2)              strcat(str1, str2)
-#define STRCMP(str1, str2)              strcmp(str1, str2)
-#define STRNCMP(str1, str2, n)          strncmp(str1, str2, n)
-#define STRLEN(str)                     strlen(str)
+#define STRCPY(dest, src)         strcpy(dest, src)
+#define STRNCPY(dest, src, n)     strncpy(dest, src, n)
+#define STRCAT(str1, str2)        strcat(str1, str2)
+#define STRCMP(str1, str2)        strcmp(str1, str2)
+#define STRNCMP(str1, str2, n)    strncmp(str1, str2, n)
+#define STRDUP(str)               kstrdup(str, GFP_KERNEL)
+#define STRLEN(str)               strlen(str)
 
 	INT32 __wstrchr(UINT16 *str, UINT16 wchar);
 	INT32 __wstrlen(UINT16 *str);
 
-#define WSTRCHR(str, wchar)             __wstrchr(str, wchar)
-#define WSTRLEN(str)                    __wstrlen(str)
+#define WSTRCHR(str, wchar)       __wstrchr(str, wchar)
+#define WSTRLEN(str)              __wstrlen(str)
 
-#if EXFAT_CONFIG_DEBUG_MSG
-#define PRINTK(...)			\
-	do {								\
-		printk("[EXFAT] " __VA_ARGS__);	\
-	} while(0)
+#define PANIC(fmt, ...)           panic(pr_fmt(fmt), ##__VA_ARGS__)
+#define LOG(level, fmt, ...)      printk("%s" pr_fmt(fmt), level, ##__VA_ARGS__)
+
+#define LOGE	pr_err
+#define LOGW	pr_warn
+#define LOGI	pr_info
+#ifdef CONFIG_EXFAT_DEBUG
+#define LOGD	pr_debug
 #else
-#define PRINTK(...)
+#define LOGD(...)
 #endif
 
 	void    Bitmap_set_all(UINT8 *bitmap, INT32 mapsize);
@@ -121,11 +121,6 @@ extern "C" {
 	void    my_itoa(INT8 *buf, INT32 v);
 	INT32   my_log2(UINT32 v);
 
-#ifdef PRINT
-#undef PRINT
-#endif
-
-#define PRINT                   printk
 #ifdef __cplusplus
 }
 #endif

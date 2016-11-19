@@ -1,8 +1,9 @@
+#include "exfat.h"
+
 #include <linux/file.h>
 #include <linux/fs.h>
 #include <linux/xattr.h>
 #include <linux/dcache.h>
-#include "exfat.h"
 
 #ifndef CONFIG_EXFAT_VIRTUAL_XATTR_SELINUX_LABEL
 #define CONFIG_EXFAT_VIRTUAL_XATTR_SELINUX_LABEL	("undefined")

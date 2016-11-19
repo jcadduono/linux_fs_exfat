@@ -62,7 +62,7 @@ struct exfat_mount_options {
 	unsigned char casesensitive;
 	unsigned char tz_utc;
 	unsigned char errors;
-#if EXFAT_CONFIG_DISCARD
+#ifdef CONFIG_EXFAT_DISCARD
 	unsigned char discard;
 #endif
 };
@@ -88,7 +88,7 @@ struct exfat_sb_info {
 
 	spinlock_t inode_hash_lock;
 	struct hlist_head inode_hashtable[EXFAT_HASH_SIZE];
-#if EXFAT_CONFIG_KERNEL_DEBUG
+#ifdef CONFIG_EXFAT_DEBUG
 	long debug_flags;
 #endif
 };

@@ -19,8 +19,8 @@
 #ifndef _EXFAT_H
 #define _EXFAT_H
 
-#include "exfat_config.h"
 #include "exfat_global.h"
+
 #include "exfat_data.h"
 #include "exfat_oal.h"
 
@@ -34,7 +34,7 @@
 extern "C" {
 #endif
 
-#if EXFAT_CONFIG_KERNEL_DEBUG
+#ifdef CONFIG_EXFAT_DEBUG
 #define EXFAT_IOC_GET_DEBUGFLAGS       _IOR('f', 100, long)
 #define EXFAT_IOC_SET_DEBUGFLAGS       _IOW('f', 101, long)
 

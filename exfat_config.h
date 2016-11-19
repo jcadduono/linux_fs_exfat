@@ -30,7 +30,6 @@ extern "C" {
 
 #define FFS_CONFIG_LITTLE_ENDIAN        1
 #define FFS_CONFIG_LEGACY_32BIT_API     0
-#define FFS_CONFIG_LEGACY_32BIT_API     0
 #define FFS_CONFIG_SUPPORT_CP1250       1
 #define FFS_CONFIG_SUPPORT_CP1251       1
 #define FFS_CONFIG_SUPPORT_CP1252       1
@@ -46,9 +45,6 @@ extern "C" {
 #define FFS_CONFIG_SUPPORT_CP949        1
 #define FFS_CONFIG_SUPPORT_CP950        1
 #define FFS_CONFIG_SUPPORT_UTF8         1
-#define EXFAT_CONFIG_DISCARD		1
-#define EXFAT_CONFIG_KERNEL_DEBUG	1
-#define EXFAT_CONFIG_DEBUG_MSG		0
 
 #ifdef __cplusplus
 }
