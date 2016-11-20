@@ -18,7 +18,6 @@
 
 #ifndef _EXFAT_DATA_H
 #define _EXFAT_DATA_H
-#include "exfat_config.h"
 #include "exfat_global.h"
 #ifdef __cplusplus
 extern "C" {

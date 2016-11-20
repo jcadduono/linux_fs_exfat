@@ -28,7 +28,6 @@
 #include <linux/mutex.h>
 #include <linux/swap.h>
 
-#include "exfat_config.h"
 #include "exfat_global.h"
 #include "exfat_data.h"
 #include "exfat_oal.h"

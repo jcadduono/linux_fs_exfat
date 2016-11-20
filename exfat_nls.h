@@ -21,7 +21,6 @@
 
 #include <linux/nls.h>
 
-#include "exfat_config.h"
 #include "exfat_global.h"
 #include "exfat_api.h"
 
