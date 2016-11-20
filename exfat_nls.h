@@ -20,6 +20,7 @@
 #define _EXFAT_NLS_H
 
 #include <linux/nls.h>
+#include <asm/byteorder.h>
 
 #include "exfat_global.h"
 #include "exfat_api.h"
@@ -33,7 +34,7 @@ extern "C" {
 #define DOS_CUR_DIR_NAME        ".          "
 #define DOS_PAR_DIR_NAME        "..         "
 
-#if (FFS_CONFIG_LITTLE_ENDIAN == 1)
+#ifdef __LITTLE_ENDIAN
 #define UNI_CUR_DIR_NAME        ".\0"
 #define UNI_PAR_DIR_NAME        ".\0.\0"
 #else
