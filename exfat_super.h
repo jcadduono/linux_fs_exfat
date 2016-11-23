@@ -76,7 +76,7 @@ struct exfat_sb_info {
 	struct exfat_mount_options options;
 	int use_vmalloc;
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,7,00)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,7,0)
 	int s_dirt;
 	struct mutex s_lock;
 #endif
@@ -98,7 +98,7 @@ struct exfat_inode_info {
 	loff_t mmu_private;
 	loff_t i_pos;
 	struct hlist_node i_hash_fat;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,4,00)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,4,0)
 	struct rw_semaphore truncate_lock;
 #endif
 	struct inode vfs_inode;
