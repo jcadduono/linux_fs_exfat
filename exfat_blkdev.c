@@ -157,13 +157,20 @@ INT32 bdev_sync(struct super_block *sb)
 INT32 bdev_reada(struct super_block *sb, UINT32 secno, UINT32 num_secs)
 {
 	BD_INFO_T *p_bd = &(EXFAT_SB(sb)->bd_info);
-	int i;
+	UINT32 sects_per_page = (PAGE_SIZE >> sb->s_blocksize_bits);
+	struct blk_plug plug;
+	UINT32 i;
 
 	if (!p_bd->opened)
 		return (FFS_MEDIAERR);
 
-	for (i = 0; i < num_secs; i++)
-		__breadahead(sb->s_bdev, secno + i, 1 << sb->s_blocksize_bits);
+	blk_start_plug(&plug);
+	for (i = 0; i < num_secs; i++) {
+		if (i && !(i & (sects_per_page - 1)))
+			blk_flush_plug_list(&plug, false);
+		sb_breadahead(sb, secno + i);
+	}
+	blk_finish_plug(&plug);
 
 	return 0;
 }
