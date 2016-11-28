@@ -34,5 +34,3 @@ int exfat_removexattr(struct dentry *dentry, const char *name) {
 		return -EOPNOTSUPP;
 	return 0;
 }
-
-

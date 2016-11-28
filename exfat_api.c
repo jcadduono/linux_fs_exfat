@@ -18,6 +18,7 @@
 
 #include "exfat_global.h"
 
+#include <linux/module.h>
 #include <linux/version.h>
 #include <linux/init.h>
 
@@ -410,8 +411,6 @@ INT32 FsRemoveEntry(struct inode *inode, FILE_ID_T *fid)
 	return(err);
 }
 
-
-
 EXPORT_SYMBOL(FsMountVol);
 EXPORT_SYMBOL(FsUmountVol);
 EXPORT_SYMBOL(FsGetVolInfo);
@@ -449,4 +448,3 @@ INT32 FsReleaseCache(struct super_block *sb)
 
 EXPORT_SYMBOL(FsReleaseCache);
 #endif
-

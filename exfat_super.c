@@ -2826,7 +2826,9 @@ static struct file_system_type exfat_fs_type = {
 #endif
 	.fs_flags    = FS_REQUIRES_DEV,
 };
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,9,0)
 MODULE_ALIAS_FS("exfat");
+#endif
 
 /* tuxera drop-in replacement compatibility */
 #ifdef CONFIG_EXFAT_COMPAT_TUXERA
@@ -2845,7 +2847,9 @@ static struct file_system_type texfat_fs_type = {
 #endif
 	.fs_flags    = FS_REQUIRES_DEV,
 };
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,9,0)
 MODULE_ALIAS_FS("texfat");
+#endif
 #endif
 
 static int __init init_exfat_fs(void)
