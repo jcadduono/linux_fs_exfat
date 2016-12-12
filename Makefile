@@ -13,4 +13,4 @@ $(exfat)-y := exfat_super.o exfat_misc.o exfat_api.o \
 	   exfat_data.o exfat_global.o exfat_nls.o \
 	   exfat_oal.o exfat_upcase.o exfat_xattr.o
 
-ccflags-y += -DEXFAT_VERSION=\"1.2.23\"
+ccflags-y += -DEXFAT_VERSION=\"1.2.24\"
