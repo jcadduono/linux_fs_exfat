@@ -2396,11 +2396,14 @@ enum {
 	Opt_allow_utime,
 	Opt_codepage,
 	Opt_charset,
+	Opt_nls,
 	Opt_utf8_no,
 	Opt_utf8_yes,
 	Opt_namecase,
+	Opt_nocase,
 	Opt_debug,
 	Opt_tz_utc,
+	Opt_force,
 	Opt_err_cont,
 	Opt_err_panic,
 	Opt_err_ro,
@@ -2417,6 +2420,7 @@ static const match_table_t exfat_tokens = {
 	{Opt_allow_utime, "allow_utime=%o"},
 	{Opt_codepage, "codepage=%u"},
 	{Opt_charset, "iocharset=%s"},
+	{Opt_nls, "nls=%s"},
 	{Opt_utf8_no, "utf8=0"},
 	{Opt_utf8_no, "utf8=no"},
 	{Opt_utf8_no, "utf8=false"},
@@ -2425,8 +2429,10 @@ static const match_table_t exfat_tokens = {
 	{Opt_utf8_yes, "utf8=true"},
 	{Opt_utf8_yes, "utf8"},
 	{Opt_namecase, "namecase=%u"},
+	{Opt_nocase, "nocase"},
 	{Opt_debug, "debug"},
 	{Opt_tz_utc, "tz=UTC"},
+	{Opt_force, "force"},
 	{Opt_err_cont, "errors=continue"},
 	{Opt_err_panic, "errors=panic"},
 	{Opt_err_ro, "errors=remount-ro"},
@@ -2500,6 +2506,7 @@ static int parse_options(char *options, int silent, int *debug,
 			opts->codepage = option;
 			break;
 		case Opt_charset:
+		case Opt_nls:
 			iocharset = match_strdup(&args[0]);
 			if (!iocharset) {
 				kfree(opts->iocharset);
@@ -2535,9 +2542,13 @@ static int parse_options(char *options, int silent, int *debug,
 				return 0;
 			opts->casesensitive = option;
 			break;
+		case Opt_nocase:
+			opts->casesensitive = 0;
+			break;
 		case Opt_tz_utc:
 			opts->tz_utc = 1;
 			break;
+		case Opt_force: /* same as errors=continue */
 		case Opt_err_cont:
 			opts->errors = EXFAT_ERRORS_CONT;
 			break;
@@ -2830,7 +2841,7 @@ static struct file_system_type exfat_fs_type = {
 MODULE_ALIAS_FS("exfat");
 #endif
 
-/* tuxera drop-in replacement compatibility */
+/* Tuxera exFAT drop-in replacement compatibility */
 #ifdef CONFIG_EXFAT_COMPAT_TUXERA
 static struct file_system_type texfat_fs_type = {
 	.owner       = THIS_MODULE,
@@ -2845,10 +2856,32 @@ static struct file_system_type texfat_fs_type = {
 #else
 	.kill_sb    = kill_block_super,
 #endif
-	.fs_flags    = FS_REQUIRES_DEV,
+	.fs_flags   = FS_REQUIRES_DEV,
 };
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,9,0)
 MODULE_ALIAS_FS("texfat");
+#endif
+#endif
+
+/* Paragon UFSD drop-in replacement compatibility */
+#ifdef CONFIG_EXFAT_COMPAT_UFSD
+static struct file_system_type ufsd_fs_type = {
+	.owner       = THIS_MODULE,
+	.name        = "ufsd",
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,37)
+	.get_sb      = exfat_get_sb,
+#else
+	.mount       = exfat_fs_mount,
+#endif
+#ifdef CONFIG_EXFAT_DEBUG
+	.kill_sb    = exfat_debug_kill_sb,
+#else
+	.kill_sb    = kill_block_super,
+#endif
+	.fs_flags   = FS_REQUIRES_DEV,
+};
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,9,0)
+MODULE_ALIAS_FS("ufsd");
 #endif
 #endif
 
@@ -2871,14 +2904,23 @@ static int __init init_exfat_fs(void)
 
 	err = register_filesystem(&exfat_fs_type);
 	if (err) {
-		LOGE("Unable to register as exfat (%d)\n", err);
+		LOGE("Unable to register as %s (%d)\n",
+			exfat_fs_type.name, err);
 		return err;
 	}
 
 #ifdef CONFIG_EXFAT_COMPAT_TUXERA
 	err = register_filesystem(&texfat_fs_type);
 	if (err)
-		LOGW("Unable to register as texfat (%d)\n", err);
+		LOGW("Unable to register as %s (%d)\n",
+			texfat_fs_type.name, err);
+#endif
+
+#ifdef CONFIG_EXFAT_COMPAT_UFSD
+	err = register_filesystem(&ufsd_fs_type);
+	if (err)
+		LOGW("Unable to register as %s (%d)\n",
+			ufsd_fs_type.name, err);
 #endif
 
 	return 0;

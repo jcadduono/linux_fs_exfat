@@ -61,11 +61,19 @@ config EXFAT_COMPAT_TUXERA
 	depends on EXFAT_FS
 	help
 	  Say Y here to have the exFAT driver also register as texfat
-	  and support extra mount options for drop-in replacement on
-	  systems previously using Tuxera's commercial exFAT driver.
+	  for drop-in replacement on systems previously using
+	  Tuxera's commercial exFAT driver.
 
 	  If you are building exFAT as a module, this will change
 	  the module's name to texfat.
+
+config EXFAT_COMPAT_UFSD
+	bool "Paragon UFSD compatibility for exFAT"
+	depends on EXFAT_FS
+	help
+	  Say Y here to have the exFAT driver also register as ufsd
+	  for drop-in replacement on systems previously using
+	  Paragon's commercial UFSD exFAT driver.
 
 config EXFAT_DEBUG
 	bool "Debugging support for exFAT"
