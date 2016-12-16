@@ -60,10 +60,8 @@ struct exfat_mount_options {
 	char *iocharset;
 	unsigned char casesensitive;
 	unsigned char tz_utc;
-	unsigned char errors;
-#ifdef CONFIG_EXFAT_DISCARD
 	unsigned char discard;
-#endif
+	unsigned char errors;
 };
 
 #define EXFAT_HASH_BITS    8

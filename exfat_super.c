@@ -2352,16 +2352,14 @@ static int exfat_show_options(struct seq_file *m, struct vfsmount *mnt)
 	seq_printf(m, ",namecase=%u", opts->casesensitive);
 	if (opts->tz_utc)
 		seq_puts(m, ",tz=UTC");
+	if (opts->discard)
+		seq_printf(m, ",discard");
 	if (opts->errors == EXFAT_ERRORS_CONT)
 		seq_puts(m, ",errors=continue");
 	else if (opts->errors == EXFAT_ERRORS_PANIC)
 		seq_puts(m, ",errors=panic");
 	else
 		seq_puts(m, ",errors=remount-ro");
-#ifdef CONFIG_EXFAT_DISCARD
-	if (opts->discard)
-		seq_printf(m, ",discard");
-#endif
 	if (p_fs->dev_ejected)
 		seq_puts(m, ",ejected");
 	return 0;
@@ -2403,12 +2401,12 @@ enum {
 	Opt_nocase,
 	Opt_debug,
 	Opt_tz_utc,
+	Opt_discard,
 	Opt_force,
 	Opt_err_cont,
 	Opt_err_panic,
 	Opt_err_ro,
-	Opt_err,
-	Opt_discard
+	Opt_err
 };
 
 static const match_table_t exfat_tokens = {
@@ -2432,11 +2430,11 @@ static const match_table_t exfat_tokens = {
 	{Opt_nocase, "nocase"},
 	{Opt_debug, "debug"},
 	{Opt_tz_utc, "tz=UTC"},
+	{Opt_discard, "discard"},
 	{Opt_force, "force"},
 	{Opt_err_cont, "errors=continue"},
 	{Opt_err_panic, "errors=panic"},
 	{Opt_err_ro, "errors=remount-ro"},
-	{Opt_discard, "discard"},
 	{Opt_err, NULL}
 };
 
@@ -2456,10 +2454,8 @@ static int parse_options(char *options, int silent, int *debug,
 	opts->iocharset = STRDUP(exfat_default_iocharset);
 	opts->casesensitive = 0;
 	opts->tz_utc = 0;
-	opts->errors = EXFAT_ERRORS_RO;
-#ifdef CONFIG_EXFAT_DISCARD
 	opts->discard = 0;
-#endif
+	opts->errors = EXFAT_ERRORS_RO;
 	*debug = 0;
 
 	if (!opts->iocharset)
@@ -2548,6 +2544,9 @@ static int parse_options(char *options, int silent, int *debug,
 		case Opt_tz_utc:
 			opts->tz_utc = 1;
 			break;
+		case Opt_discard:
+			opts->discard = 1;
+			break;
 		case Opt_force: /* same as errors=continue */
 		case Opt_err_cont:
 			opts->errors = EXFAT_ERRORS_CONT;
@@ -2560,11 +2559,6 @@ static int parse_options(char *options, int silent, int *debug,
 			break;
 		case Opt_debug:
 			*debug = 1;
-			break;
-		case Opt_discard:
-#ifdef CONFIG_EXFAT_DISCARD
-			opts->discard = 1;
-#endif
 			break;
 		default:
 			if (!silent) {

@@ -46,16 +46,6 @@ config EXFAT_VIRTUAL_XATTR_SELINUX_LABEL
 	help
 	  Set this to the default string for exFAT SELinux label.
 
-config EXFAT_DISCARD
-	bool "Discard support for exFAT"
-	default y
-	depends on EXFAT_FS
-	help
-	  Say Y here to enable support for the block discard feature
-	  on exFAT filesystems.
-
-	  You must mount with the discard option to use it.
-
 config EXFAT_COMPAT_TUXERA
 	bool "Tuxera compatibility for exFAT"
 	depends on EXFAT_FS
