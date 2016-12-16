@@ -2393,7 +2393,7 @@ enum {
 	Opt_fmask,
 	Opt_allow_utime,
 	Opt_codepage,
-	Opt_charset,
+	Opt_iocharset,
 	Opt_nls,
 	Opt_utf8_no,
 	Opt_utf8_yes,
@@ -2417,7 +2417,7 @@ static const match_table_t exfat_tokens = {
 	{Opt_fmask, "fmask=%o"},
 	{Opt_allow_utime, "allow_utime=%o"},
 	{Opt_codepage, "codepage=%u"},
-	{Opt_charset, "iocharset=%s"},
+	{Opt_iocharset, "iocharset=%s"},
 	{Opt_nls, "nls=%s"},
 	{Opt_utf8_no, "utf8=0"},
 	{Opt_utf8_no, "utf8=no"},
@@ -2444,22 +2444,18 @@ static int parse_options(char *options, int silent, int *debug,
 	char *p;
 	substring_t args[MAX_OPT_ARGS];
 	int option;
-	char *iocharset;
 
 	opts->fs_uid = current_uid();
 	opts->fs_gid = current_gid();
 	opts->fs_fmask = opts->fs_dmask = current->fs->umask;
 	opts->allow_utime = (unsigned short) -1;
 	opts->codepage = exfat_default_codepage;
-	opts->iocharset = STRDUP(exfat_default_iocharset);
+	opts->iocharset = 0;
 	opts->casesensitive = 0;
 	opts->tz_utc = 0;
 	opts->discard = 0;
 	opts->errors = EXFAT_ERRORS_RO;
 	*debug = 0;
-
-	if (!opts->iocharset)
-		return -ENOMEM;
 
 	if (!options)
 		goto out;
@@ -2501,37 +2497,21 @@ static int parse_options(char *options, int silent, int *debug,
 				return 0;
 			opts->codepage = option;
 			break;
-		case Opt_charset:
+		case Opt_iocharset:
 		case Opt_nls:
-			iocharset = match_strdup(&args[0]);
-			if (!iocharset) {
+			if (opts->iocharset)
 				kfree(opts->iocharset);
-				return -ENOMEM;
-			}
-			if (!strcmp(opts->iocharset, iocharset)) {
-				kfree(iocharset);
-				break;
-			}
-			kfree(opts->iocharset);
-			opts->iocharset = iocharset;
+			opts->iocharset = match_strdup(&args[0]);
 			break;
 		case Opt_utf8_yes:
-			if (!strcmp(opts->iocharset, "utf8"))
-				break;
-			kfree(opts->iocharset);
-			iocharset = STRDUP("utf8");
-			if (!iocharset)
-				return -ENOMEM;
-			opts->iocharset = iocharset;
+			if (opts->iocharset)
+				kfree(opts->iocharset);
+			opts->iocharset = STRDUP("utf8");
 			break;
 		case Opt_utf8_no:
-			if (strcmp(opts->iocharset, "utf8"))
-				break;
-			kfree(opts->iocharset);
-			iocharset = STRDUP("iso8859-1");
-			if (!iocharset)
-				return -ENOMEM;
-			opts->iocharset = iocharset;
+			if (opts->iocharset)
+				kfree(opts->iocharset);
+			opts->iocharset = STRDUP("iso8859-1");
 			break;
 		case Opt_namecase:
 			if (match_int(&args[0], &option))
@@ -2571,6 +2551,12 @@ static int parse_options(char *options, int silent, int *debug,
 out:
 	if (opts->allow_utime == (unsigned short) -1)
 		opts->allow_utime = ~opts->fs_dmask & (S_IWGRP | S_IWOTH);
+
+	if (!opts->iocharset) {
+		opts->iocharset = STRDUP(exfat_default_iocharset);
+		if (!opts->iocharset)
+			return -ENOMEM;
+	}
 
 	return 0;
 }
