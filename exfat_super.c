@@ -955,7 +955,7 @@ static struct dentry *exfat_lookup(struct inode *dir, struct dentry *dentry,
 	}
 
 	i_mode = inode->i_mode;
-	if (S_ISLNK(i_mode)) {
+	if (S_ISLNK(i_mode) && !EXFAT_I(inode)->target) {
 		EXFAT_I(inode)->target = MALLOC(i_size_read(inode)+1);
 		if (!EXFAT_I(inode)->target) {
 			err = -ENOMEM;
