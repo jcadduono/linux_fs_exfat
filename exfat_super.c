@@ -2631,6 +2631,47 @@ static void setup_dops(struct super_block *sb)
 		sb->s_d_op = &exfat_dentry_ops;
 }
 
+static struct inode *exfat_nfs_get_inode(struct super_block *sb,
+					 UINT64 ino, UINT32 generation)
+{
+	struct inode *inode;
+
+	if (ino < EXFAT_ROOT_INO)
+		return ERR_PTR(-ESTALE);
+
+	inode = ilookup(sb, ino);
+	if (!inode)
+		return ERR_PTR(-ESTALE);
+	if (IS_ERR(inode))
+		return inode;
+	if (generation && inode->i_generation != generation) {
+		iput(inode);
+		return ERR_PTR(-ESTALE);
+	}
+
+	return inode;
+}
+
+static struct dentry *exfat_fh_to_dentry(struct super_block *sb,
+					 struct fid *fid,
+					 int fh_len, int fh_type)
+{
+	return generic_fh_to_dentry(sb, fid, fh_len, fh_type,
+				    exfat_nfs_get_inode);
+}
+
+static struct dentry *exfat_fh_to_parent(struct super_block *sb,
+					 struct fid *fid,
+					 int fh_len, int fh_type)
+{
+	return generic_fh_to_parent(sb, fid, fh_len, fh_type,
+				    exfat_nfs_get_inode);
+}
+
+const struct export_operations exfat_export_ops = {
+	.fh_to_dentry   = exfat_fh_to_dentry,
+	.fh_to_parent   = exfat_fh_to_parent,
+};
 
 static int exfat_fill_super(struct super_block *sb, void *data, int silent)
 {
@@ -2659,6 +2700,7 @@ static int exfat_fill_super(struct super_block *sb, void *data, int silent)
 	sb->s_flags |= MS_NODIRATIME;
 	sb->s_magic = EXFAT_SUPER_MAGIC;
 	sb->s_op = &exfat_sops;
+	sb->s_export_op = &exfat_export_ops;
 
 	error = parse_options(data, silent, &debug, &sbi->options);
 	if (error)
