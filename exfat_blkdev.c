@@ -61,7 +61,7 @@ INT32 bdev_close(struct super_block *sb)
 	return(FFS_SUCCESS);
 }
 
-INT32 bdev_read(struct super_block *sb, UINT32 secno, struct buffer_head **bh, UINT32 num_secs, INT32 read)
+INT32 bdev_read(struct super_block *sb, SECTOR secno, struct buffer_head **bh, UINT32 num_secs, INT32 read)
 {
 	BD_INFO_T *p_bd = &(EXFAT_SB(sb)->bd_info);
 	FS_INFO_T *p_fs = &(EXFAT_SB(sb)->fs_info);
@@ -89,7 +89,7 @@ INT32 bdev_read(struct super_block *sb, UINT32 secno, struct buffer_head **bh, U
 	return(FFS_MEDIAERR);
 }
 
-INT32 bdev_write(struct super_block *sb, UINT32 secno, struct buffer_head *bh, UINT32 num_secs, INT32 sync)
+INT32 bdev_write(struct super_block *sb, SECTOR secno, struct buffer_head *bh, UINT32 num_secs, INT32 sync)
 {
 	INT32 count;
 	struct buffer_head *bh2;
@@ -154,7 +154,7 @@ INT32 bdev_sync(struct super_block *sb)
 	return sync_blockdev(sb->s_bdev);
 }
 
-INT32 bdev_reada(struct super_block *sb, UINT32 secno, UINT32 num_secs)
+INT32 bdev_reada(struct super_block *sb, SECTOR secno, UINT32 num_secs)
 {
 	BD_INFO_T *p_bd = &(EXFAT_SB(sb)->bd_info);
 	UINT32 sects_per_page = (PAGE_SIZE >> sb->s_blocksize_bits);

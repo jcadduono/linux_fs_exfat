@@ -1688,7 +1688,7 @@ const struct inode_operations exfat_file_inode_operations = {
 #endif
 };
 
-static int exfat_bmap(struct inode *inode, sector_t sector, sector_t *phys,
+static int exfat_bmap(struct inode *inode, SECTOR sector, SECTOR *phys,
 		      unsigned long *mapped_blocks, int *create)
 {
 	struct super_block *sb = inode->i_sb;
@@ -1697,7 +1697,7 @@ static int exfat_bmap(struct inode *inode, sector_t sector, sector_t *phys,
 	BD_INFO_T *p_bd = &(sbi->bd_info);
 	const unsigned long blocksize = sb->s_blocksize;
 	const unsigned char blocksize_bits = sb->s_blocksize_bits;
-	sector_t last_block;
+	SECTOR last_block;
 	int err, clu_offset, sec_offset;
 	unsigned int cluster;
 
@@ -1741,14 +1741,14 @@ static int exfat_bmap(struct inode *inode, sector_t sector, sector_t *phys,
 	return 0;
 }
 
-static int exfat_get_block(struct inode *inode, sector_t iblock,
+static int exfat_get_block(struct inode *inode, SECTOR iblock,
 			   struct buffer_head *bh_result, int create)
 {
 	struct super_block *sb = inode->i_sb;
 	unsigned long max_blocks = bh_result->b_size >> inode->i_blkbits;
 	int err;
 	unsigned long mapped_blocks;
-	sector_t phys;
+	SECTOR phys;
 
 	__lock_super(sb);
 
@@ -1957,9 +1957,9 @@ static ssize_t exfat_direct_IO(int rw, struct kiocb *iocb,
 }
 #endif
 
-static sector_t _exfat_bmap(struct address_space *mapping, sector_t block)
+static SECTOR _exfat_bmap(struct address_space *mapping, SECTOR block)
 {
-	sector_t blocknr;
+	SECTOR blocknr;
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,4,0)
 	down_read(&EXFAT_I(mapping->host)->truncate_lock);

@@ -59,6 +59,7 @@ extern "C" {
 	typedef unsigned int            UINT32;
 	typedef unsigned long long      UINT64;
 	typedef unsigned char           BOOL;
+	typedef sector_t                SECTOR;
 
 #ifdef MALLOC
 #undef MALLOC

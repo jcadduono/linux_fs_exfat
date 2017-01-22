@@ -36,7 +36,7 @@ extern "C" {
 		struct __BUF_CACHE_T *hash_next;
 		struct __BUF_CACHE_T *hash_prev;
 		INT32                drv;
-		UINT32               sec;
+		SECTOR               sec;
 		UINT32               flag;
 		struct buffer_head   *buf_bh;
 	} BUF_CACHE_T;
@@ -45,18 +45,18 @@ extern "C" {
 	INT32  buf_shutdown(struct super_block *sb);
 	INT32  FAT_read(struct super_block *sb, UINT32 loc, UINT32 *content);
 	INT32  FAT_write(struct super_block *sb, UINT32 loc, UINT32 content);
-	UINT8 *FAT_getblk(struct super_block *sb, UINT32 sec);
-	void   FAT_modify(struct super_block *sb, UINT32 sec);
+	UINT8 *FAT_getblk(struct super_block *sb, SECTOR sec);
+	void   FAT_modify(struct super_block *sb, SECTOR sec);
 	void   FAT_release_all(struct super_block *sb);
 	void   FAT_sync(struct super_block *sb);
-	UINT8 *buf_getblk(struct super_block *sb, UINT32 sec);
-	void   buf_modify(struct super_block *sb, UINT32 sec);
-	void   buf_lock(struct super_block *sb, UINT32 sec);
-	void   buf_unlock(struct super_block *sb, UINT32 sec);
-	void   buf_release(struct super_block *sb, UINT32 sec);
+	UINT8 *buf_getblk(struct super_block *sb, SECTOR sec);
+	void   buf_modify(struct super_block *sb, SECTOR sec);
+	void   buf_lock(struct super_block *sb, SECTOR sec);
+	void   buf_unlock(struct super_block *sb, SECTOR sec);
+	void   buf_release(struct super_block *sb, SECTOR sec);
 	void   buf_release_all(struct super_block *sb);
 	void   buf_sync(struct super_block *sb);
-	INT32 buf_cache_readahead(struct super_block * sb, UINT32 sec);
+	INT32 buf_cache_readahead(struct super_block * sb, SECTOR sec);
 
 #ifdef __cplusplus
 }
