@@ -1527,10 +1527,19 @@ static int exfat_setattr(struct dentry *dentry, struct iattr *attr)
 	return error;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,11,0)
+static int exfat_getattr(const struct path *path, struct kstat *stat,
+			 u32 request_mask, unsigned int flags)
+#else
 static int exfat_getattr(struct vfsmount *mnt, struct dentry *dentry,
 			 struct kstat *stat)
+#endif
 {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,11,0)
+	struct inode *inode = path->dentry->d_inode;
+#else
 	struct inode *inode = dentry->d_inode;
+#endif
 
 	LOGD("entered\n");
 
