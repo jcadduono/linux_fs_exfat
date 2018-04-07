@@ -82,6 +82,9 @@
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
 #include <linux/aio.h>
 #endif
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,16,0)
+#include <linux/iversion.h>
+#endif
 #include <linux/parser.h>
 #include <linux/uio.h>
 #include <linux/writeback.h>
@@ -387,7 +390,12 @@ static int __exfat_revalidate(struct dentry *dentry)
 {
 	int ret = 1;
 	spin_lock(&dentry->d_lock);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,16,0)
+	if ((dentry->d_time !=
+		inode_query_iversion(dentry->d_parent->d_inode)) &&
+#else
 	if ((dentry->d_time != dentry->d_parent->d_inode->i_version) &&
+#endif
 		!__check_dstate_locked(dentry)) {
 		ret = 0;
 	}
@@ -875,7 +883,11 @@ static int exfat_create(struct inode *dir, struct dentry *dentry,
 
 	__lock_d_revalidate(dentry);
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,16,0)
+	inode_inc_iversion(dir);
+#else
 	dir->i_version++;
+#endif
 	dir->i_ctime = dir->i_mtime = dir->i_atime = ts;
 	if (IS_DIRSYNC(dir))
 		(void) exfat_sync_inode(dir);
@@ -889,7 +901,11 @@ static int exfat_create(struct inode *dir, struct dentry *dentry,
 		err = PTR_ERR(inode);
 		goto out;
 	}
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,16,0)
+	inode_inc_iversion(inode);
+#else
 	inode->i_version++;
+#endif
 	inode->i_mtime = inode->i_atime = inode->i_ctime = ts;
 
 	d_instantiate(dentry, inode);
@@ -991,7 +1007,11 @@ static struct dentry *exfat_lookup(struct inode *dir, struct dentry *dentry,
 		dput(alias);
 	}
 out:
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,16,0)
+	dentry->d_time = inode_query_iversion(dir);
+#else
 	dentry->d_time = dir->i_version;
+#endif
 	__unlock_super(sb);
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,38)
 	dentry->d_op = sb->s_root->d_op;
@@ -1040,7 +1060,11 @@ static int exfat_unlink(struct inode *dir, struct dentry *dentry)
 
 	__lock_d_revalidate(dentry);
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,16,0)
+	inode_inc_iversion(dir);
+#else
 	dir->i_version++;
+#endif
 	dir->i_mtime = dir->i_atime = ts;
 	if (IS_DIRSYNC(dir))
 		(void) exfat_sync_inode(dir);
@@ -1050,7 +1074,11 @@ static int exfat_unlink(struct inode *dir, struct dentry *dentry)
 	clear_nlink(inode);
 	inode->i_mtime = inode->i_atime = ts;
 	exfat_detach(inode);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,16,0)
+	dentry->d_time = inode_query_iversion(dir);
+#else
 	dentry->d_time = dir->i_version;
+#endif
 
 out:
 	__unlock_d_revalidate(dentry);
@@ -1108,7 +1136,11 @@ static int exfat_symlink(struct inode *dir, struct dentry *dentry,
 
 	__lock_d_revalidate(dentry);
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,16,0)
+	inode_inc_iversion(dir);
+#else
 	dir->i_version++;
+#endif
 	dir->i_ctime = dir->i_mtime = dir->i_atime = ts;
 	if (IS_DIRSYNC(dir))
 		(void) exfat_sync_inode(dir);
@@ -1122,7 +1154,11 @@ static int exfat_symlink(struct inode *dir, struct dentry *dentry,
 		err = PTR_ERR(inode);
 		goto out;
 	}
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,16,0)
+	inode_inc_iversion(inode);
+#else
 	inode->i_version++;
+#endif
 	inode->i_mtime = inode->i_atime = inode->i_ctime = ts;
 
 	EXFAT_I(inode)->target = MALLOC(len+1);
@@ -1132,7 +1168,11 @@ static int exfat_symlink(struct inode *dir, struct dentry *dentry,
 	}
 	MEMCPY(EXFAT_I(inode)->target, target, len+1);
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,16,0)
+	dentry->d_time = inode_query_iversion(dentry->d_parent->d_inode);
+#else
 	dentry->d_time = dentry->d_parent->d_inode->i_version;
+#endif
 	d_instantiate(dentry, inode);
 
 out:
@@ -1182,7 +1222,11 @@ static int exfat_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 
 	__lock_d_revalidate(dentry);
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,16,0)
+	inode_inc_iversion(dir);
+#else
 	dir->i_version++;
+#endif
 	dir->i_ctime = dir->i_mtime = dir->i_atime = ts;
 	if (IS_DIRSYNC(dir))
 		(void) exfat_sync_inode(dir);
@@ -1197,7 +1241,11 @@ static int exfat_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 		err = PTR_ERR(inode);
 		goto out;
 	}
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,16,0)
+	inode_inc_iversion(inode);
+#else
 	inode->i_version++;
+#endif
 	inode->i_mtime = inode->i_atime = inode->i_ctime = ts;
 
 	d_instantiate(dentry, inode);
@@ -1250,7 +1298,11 @@ static int exfat_rmdir(struct inode *dir, struct dentry *dentry)
 
 	__lock_d_revalidate(dentry);
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,16,0)
+	inode_inc_iversion(dir);
+#else
 	dir->i_version++;
+#endif
 	dir->i_mtime = dir->i_atime = ts;
 	if (IS_DIRSYNC(dir))
 		(void) exfat_sync_inode(dir);
@@ -1261,7 +1313,12 @@ static int exfat_rmdir(struct inode *dir, struct dentry *dentry)
 	clear_nlink(inode);
 	inode->i_mtime = inode->i_atime = ts;
 	exfat_detach(inode);
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,16,0)
+	dentry->d_time = inode_query_iversion(dir);
+#else
 	dentry->d_time = dir->i_version;
+#endif
 	remove_inode_hash(inode);
 
 out:
@@ -1328,7 +1385,11 @@ static int exfat_rename(struct inode *old_dir, struct dentry *old_dentry,
 
 	__lock_d_revalidate(old_dentry);
 	__lock_d_revalidate(new_dentry);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,16,0)
+	inode_inc_iversion(new_dir);
+#else
 	new_dir->i_version++;
+#endif
 	new_dir->i_ctime = new_dir->i_mtime = new_dir->i_atime = ts;
 	if (IS_DIRSYNC(new_dir))
 		(void) exfat_sync_inode(new_dir);
@@ -1350,7 +1411,11 @@ static int exfat_rename(struct inode *old_dir, struct dentry *old_dentry,
 		if (!new_inode) inc_nlink(new_dir);
 	}
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,16,0)
+	inode_inc_iversion(old_dir);
+#else
 	old_dir->i_version++;
+#endif
 	old_dir->i_ctime = old_dir->i_mtime = ts;
 	if (IS_DIRSYNC(old_dir))
 		(void) exfat_sync_inode(old_dir);
@@ -2065,7 +2130,11 @@ static int exfat_fill_inode(struct inode *inode, FILE_ID_T *fid)
 	EXFAT_I(inode)->target = NULL;
 	inode->i_uid = sbi->options.fs_uid;
 	inode->i_gid = sbi->options.fs_gid;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,16,0)
+	inode_inc_iversion(inode);
+#else
 	inode->i_version++;
+#endif
 	inode->i_generation = get_seconds();
 
 	if (info.Attr & ATTR_SUBDIR) {
@@ -2126,7 +2195,11 @@ static struct inode *exfat_build_inode(struct super_block *sb,
 		goto out;
 	}
 	inode->i_ino = iunique(sb, EXFAT_ROOT_INO);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,16,0)
+	inode_set_iversion(inode, 1);
+#else
 	inode->i_version = 1;
+#endif
 	err = exfat_fill_inode(inode, fid);
 	if (err) {
 		iput(inode);
@@ -2611,7 +2684,11 @@ static int exfat_read_root(struct inode *inode)
 
 	inode->i_uid = sbi->options.fs_uid;
 	inode->i_gid = sbi->options.fs_gid;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,16,0)
+	inode_inc_iversion(inode);
+#else
 	inode->i_version++;
+#endif
 	inode->i_generation = 0;
 	inode->i_mode = exfat_make_mode(sbi, ATTR_SUBDIR, S_IRWXUGO);
 	inode->i_op = &exfat_dir_inode_operations;
@@ -2753,7 +2830,11 @@ static int exfat_fill_super(struct super_block *sb, void *data, int silent)
 	if (!root_inode)
 		goto out_fail2;
 	root_inode->i_ino = EXFAT_ROOT_INO;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,16,0)
+	inode_set_iversion(root_inode, 1);
+#else
 	root_inode->i_version = 1;
+#endif
 	error = exfat_read_root(root_inode);
 	if (error < 0)
 		goto out_fail2;
